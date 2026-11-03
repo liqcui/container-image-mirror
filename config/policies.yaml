@@ -26,10 +26,10 @@ spec:
     # Applied to images that do not override `platforms`.
     # NOTE: these are assertions, not filters. `skopeo copy --all` mirrors the
     # whole manifest list, so a declared platform that is missing upstream is a
-    # hard failure rather than something the copy silently drops.
+    # hard failure rather than something the copy silently drops. The clusters
+    # only run linux/amd64, so that is the only platform we assert.
     defaultPlatforms:
       - linux/amd64
-      - linux/arm64
     # Floating tags are rejected because a mirrored image must be reproducible.
     allowLatest: false
     # Require <registry>/<project>/<source-host>/<path> so the provenance of a

@@ -2,25 +2,52 @@ apiVersion: mirror.suanova.io/v1alpha1
 kind: ImageMirrorList
 metadata:
   name: databases
-  description: Data stores running inside the platform.
+  description: PostgreSQL and Redis operators, servers and exporters.
 
 spec:
   defaults:
     platforms:
       - linux/amd64
-      - linux/arm64
 
   images:
-    - name: postgres
-      source: docker.io/library/postgres
-      target: harbor.isuanova.com/mirrors/docker.io/library/postgres
+    - name: cloudnative-pg-operator
+      source: ghcr.io/cloudnative-pg/cloudnative-pg
+      target: harbor.isuanova.com/mirrors/ghcr.io/cloudnative-pg/cloudnative-pg
       versions:
-        # Major 17 is kept for existing clusters while 18 is rolled out.
-        - tag: "17.6"
-        - tag: "18.0"
+        - tag: "1.30.0"
+          digest: sha256:a2701eb97cdd2a34b1fdb2cb51987f544b706e40bec72ae7146cd8580efefebb
+
+    - name: postgresql
+      source: ghcr.io/cloudnative-pg/postgresql
+      target: harbor.isuanova.com/mirrors/ghcr.io/cloudnative-pg/postgresql
+      versions:
+        - tag: "16.14-system-trixie"
+          digest: sha256:04f35778ca3b55b52a81dae969bef179ead315b9f02d2b4b21a3415de269b836
 
     - name: redis
-      source: docker.io/library/redis
-      target: harbor.isuanova.com/mirrors/docker.io/library/redis
+      source: quay.io/opstree/redis
+      target: harbor.isuanova.com/mirrors/quay.io/opstree/redis
       versions:
-        - tag: "8.10.3"
+        - tag: "v7.0.15"
+          digest: sha256:284c5a51803da9483d66d4f458b1fa9e8b8a67a6e55b9793a0b005cd39239356
+
+    - name: redis-exporter
+      source: quay.io/opstree/redis-exporter
+      target: harbor.isuanova.com/mirrors/quay.io/opstree/redis-exporter
+      versions:
+        - tag: "v1.44.0"
+          digest: sha256:a63d2b6e946f8b82467ec5f853c24ab994b7cab5eacc3c3cbaa50e49bd27f235
+
+    - name: redis-operator
+      source: quay.io/opstree/redis-operator
+      target: harbor.isuanova.com/mirrors/quay.io/opstree/redis-operator
+      versions:
+        - tag: "v0.26.0"
+          digest: sha256:1c6818e5e50553f9f3c1b91a8824ae5c1999a0c9416c794ca51431b7f0cb48c3
+
+    - name: redis-sentinel
+      source: quay.io/opstree/redis-sentinel
+      target: harbor.isuanova.com/mirrors/quay.io/opstree/redis-sentinel
+      versions:
+        - tag: "v7.0.15"
+          digest: sha256:db76095344deeda213aa714ac3ab8205658eb7b8e1206ba409bdec17f68175fa

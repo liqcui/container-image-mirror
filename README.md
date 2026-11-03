@@ -11,11 +11,12 @@ Kubernetes，也不管理自研镜像（`suanova/`、`suanova-private/`）。新
 
 | 决策 | 原因 |
 | --- | --- |
-| Skopeo 直接 registry→registry 复制 | 不依赖 Docker daemon，保留多架构 manifest list |
+| Skopeo 直接 registry→registry 复制 | 不依赖 Docker daemon，原样保留 manifest list |
 | 仅固定版本（pinned） | 生产环境拉到的字节必须可预测；升级是一次可评审的 PR |
 | 复制后比对 manifest digest | 不看 `skopeo copy` 的退出码，看目标仓库里的实际字节 |
 | 目标路径包含源 Registry 主机名 | 从 pull 地址就能看出镜像来源，且不同 Registry 同名仓库不会冲突 |
 | `platforms` 是断言而非过滤器 | `skopeo copy --all` 复制整个 manifest list；声明的架构缺失即失败 |
+| 只断言 `linux/amd64` | 集群只有 amd64 节点；不裁剪 manifest list，digest 仍与上游一致 |
 | 单次运行只写一个 authfile | 兼容旧版 skopeo，凭据不落盘到仓库 |
 
 ## 目录结构
@@ -28,6 +29,24 @@ scripts/                validate / sync / verify / scan / report
 docs/                   新增镜像、路径映射、安全说明
 .github/workflows/      PR 校验、手动同步、定时兜底、每周扫描
 ```
+
+## 清单来源
+
+`images/*.yaml` 与 Harbor `mirrors/` 项目里的实际内容一一对应。每个仓库的
+tag、digest 取自 `suanova/cubestack-operator` 的 `[cve-report]` issue——每月
+扫描会在 issue 正文里附一张 Artifact 表，列出 tag、digest 和推送时间。
+
+清单里钉的 digest 是上游 manifest list（index）digest。Harbor 中绝大多数仓库
+保存的本来就是 index，同 tag 的 digest 与上游一致，首次运行会命中
+“Already up to date”——清单的作用是把现状固化成可校验、可评审的声明。
+
+有 12 个仓库（`cloudnative-pg`、`opstree/*`、`perses*`、`prometheus-operator`
+等）当初是单架构复制进去的，Harbor 里的 digest 是 amd64 子 manifest digest。
+清单按上游 index digest 固定，所以首次同步会把这些 tag 重推成完整 manifest
+list；amd64 子 manifest 的字节和 digest 都不变，生产拉取不受影响。
+
+例外：`docker.io/nicolaka/netshoot` 只有浮动的 `latest`，按“仅固定版本”策略
+不纳入本仓库管理。
 
 ## 快速开始
 
@@ -68,7 +87,7 @@ metadata:
 
 spec:
   defaults:
-    platforms: [linux/amd64, linux/arm64]
+    platforms: [linux/amd64]
 
   images:
     - name: nginx
@@ -78,7 +97,7 @@ spec:
         - tag: "1.31.8"
           # 可选：钉死 digest 后，上游 tag 被重新指向会直接失败
           # digest: sha256:…
-      # 可选：覆盖 defaults
+      # 可选：覆盖 defaults（例如上游只发布单架构时）
       # platforms: [linux/amd64]
       # signature:
       #   verify: true

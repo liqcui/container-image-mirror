@@ -115,6 +115,8 @@ CycloneDX SBOM，作为 Actions artifact 保留 90 天。
 
 - `skopeo copy --all` 会复制 manifest list 里的**全部**平台，`platforms` 只做
   断言。想裁剪平台需要重写 manifest list，会改变 digest，本仓库不做这件事。
+- 上游直接发布单架构 manifest（没有 manifest list）时，平台断言改为读取镜像
+  config 的 `os` / `architecture`，结论一样，只是不再经过 manifest list。
 - Harbor 的 tag 不可变策略与"上游 tag 漂移"冲突时，同步会失败并等待人工处理，
   这是刻意选择：宁可停下来，也不静默覆盖已发布的内容。
 - 凭据以明文 JSON 形式存在于 secret 与临时 authfile 中；runner 是 GitHub 托管的

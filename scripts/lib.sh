@@ -161,6 +161,16 @@ skopeo_inspect_raw() {
   skopeo "${args[@]}" "docker://$ref"
 }
 
+skopeo_inspect_config() {
+  local ref
+  ref=$(strip_scheme "$1")
+  local -a args=(inspect --config --authfile "$AUTHFILE")
+  if [[ $(tls_verify_for "$(host_of "$ref")") == "false" ]]; then
+    args+=(--tls-verify=false)
+  fi
+  skopeo "${args[@]}" "docker://$ref"
+}
+
 # Digest of the manifest as served by the registry (sha256 of the raw bytes).
 # Deliberately not `skopeo inspect --format {{.Digest}}`: hashing the raw
 # manifest is independent of how skopeo resolves manifest lists.
@@ -179,12 +189,14 @@ manifest_platforms() {
     return 0
   fi
 
-  local -a args=(inspect --authfile "$AUTHFILE")
-  if [[ $(tls_verify_for "$(host_of "$ref")") == "false" ]]; then
-    args+=(--tls-verify=false)
+  # A single image manifest (no index) carries its platform in the image config.
+  # `skopeo inspect --format` is not used here because it selects a manifest for
+  # the *host* platform, which fails on darwin when inspecting a linux image.
+  local cfg
+  if cfg=$(skopeo_inspect_config "$ref" 2>/dev/null); then
+    jq -r '"\(.os)/\(.architecture)" + (if .variant then "/" + .variant else "" end)' \
+      <<<"$cfg"
   fi
-  skopeo "${args[@]}" --format '{{.Os}}/{{.Architecture}}{{if .Variant}}/{{.Variant}}{{end}}' \
-    "docker://$ref" 2>/dev/null
 }
 
 # assert_platforms <ref> <platform>...

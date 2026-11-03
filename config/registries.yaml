@@ -33,6 +33,6 @@ spec:
     - host: registry.k8s.io
       auth: anonymous
       tlsVerify: true
-    - host: mcr.microsoft.com
+    - host: nvcr.io
       auth: anonymous
       tlsVerify: true

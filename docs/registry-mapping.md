@@ -11,6 +11,9 @@
 本仓库只写 `mirrors/`。`config/registries.yaml` 里 `destinations[].project` 与
 `validate.sh` 的校验共同保证这一点：`target` 不落在声明的项目下会直接校验失败。
 
+`images/*.yaml` 里的 tag 与 digest 来自 `suanova/cubestack-operator` 的
+`[cve-report]` issue（Artifact 表），与 `mirrors/` 中的实际内容一一对应。
+
 ## 映射规则
 
 ```
@@ -22,10 +25,10 @@
 
 | 源 | 镜像后 |
 | --- | --- |
-| `docker.io/library/nginx:1.31.8` | `harbor.isuanova.com/mirrors/docker.io/library/nginx:1.31.8` |
-| `quay.io/prometheus/prometheus:v3.15.1` | `harbor.isuanova.com/mirrors/quay.io/prometheus/prometheus:v3.15.1` |
-| `ghcr.io/aquasecurity/trivy-operator:0.10.2` | `harbor.isuanova.com/mirrors/ghcr.io/aquasecurity/trivy-operator:0.10.2` |
-| `registry.k8s.io/pause:3.10` | `harbor.isuanova.com/mirrors/registry.k8s.io/pause:3.10` |
+| `docker.io/library/nginx:1.30.1-alpine` | `harbor.isuanova.com/mirrors/docker.io/library/nginx:1.30.1-alpine` |
+| `quay.io/prometheus/alertmanager:v0.34.0` | `harbor.isuanova.com/mirrors/quay.io/prometheus/alertmanager:v0.34.0` |
+| `ghcr.io/kube-vip/kube-vip:v1.0.3` | `harbor.isuanova.com/mirrors/ghcr.io/kube-vip/kube-vip:v1.0.3` |
+| `registry.k8s.io/pause:3.10.1` | `harbor.isuanova.com/mirrors/registry.k8s.io/pause:3.10.1` |
 
 ### 为什么保留源 Registry 主机名
 

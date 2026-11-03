@@ -1,0 +1,102 @@
+apiVersion: mirror.suanova.io/v1alpha1
+kind: ImageMirrorList
+metadata:
+  name: gpu
+  description: NVIDIA GPU operator stack, drivers and device plugins.
+
+spec:
+  defaults:
+    platforms:
+      - linux/amd64
+
+  images:
+    - name: rdma-shared-dev-plugin
+      source: ghcr.io/mellanox/k8s-rdma-shared-dev-plugin
+      target: harbor.isuanova.com/mirrors/ghcr.io/mellanox/k8s-rdma-shared-dev-plugin
+      versions:
+        - tag: "v1.5.4"
+          digest: sha256:97e10cbcdba89f295152b4d55cb266078764aacb7180938c7f840fb3d712f875
+
+    - name: cc-manager
+      source: nvcr.io/nvidia/cloud-native/k8s-cc-manager
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/cloud-native/k8s-cc-manager
+      versions:
+        - tag: "v0.4.4"
+          digest: sha256:09b376f2bb829819549a4b27086b532047ec51ea5585ca22b96c26c2939e92bd
+
+    - name: driver-manager
+      source: nvcr.io/nvidia/cloud-native/k8s-driver-manager
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/cloud-native/k8s-driver-manager
+      versions:
+        - tag: "v0.12.1"
+          digest: sha256:37e6bf0cf02b5888288a173353b858da8823cc9f9fb9c6e8d6d1e2cf5bfb16c8
+
+    - name: mig-manager
+      source: nvcr.io/nvidia/cloud-native/k8s-mig-manager
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/cloud-native/k8s-mig-manager
+      versions:
+        - tag: "v0.15.1"
+          digest: sha256:c1674fa2f46012dc425539f7fcac6445dce13bc81a05e4f91e311c7b8c27bcaf
+
+    - name: sandbox-device-plugin
+      source: nvcr.io/nvidia/cloud-native/nvidia-sandbox-device-plugin
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/cloud-native/nvidia-sandbox-device-plugin
+      versions:
+        - tag: "v0.0.5"
+          digest: sha256:5b59e2e534c804381eb0055f7e2511eea812bae33f1ea67e306dab64870454bb
+
+    - name: vgpu-device-manager
+      source: nvcr.io/nvidia/cloud-native/vgpu-device-manager
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/cloud-native/vgpu-device-manager
+      versions:
+        - tag: "v0.5.1"
+          digest: sha256:a846793e78fac0d88156ee08f9835b9e29d99b0b316a165ea4a3acf0e27ad0fd
+
+    - name: nvidia-driver
+      source: nvcr.io/nvidia/driver
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/driver
+      versions:
+        - tag: "595-5.15.0-186-generic-ubuntu22.04"
+          digest: sha256:132ff748143e522eecf2da238a9e8764aad5c10611826a7ff536400f41d02060
+
+    - name: gpu-operator
+      source: nvcr.io/nvidia/gpu-operator
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/gpu-operator
+      versions:
+        - tag: "v26.7.2"
+          digest: sha256:02933b43d286d1321cd0dadd460b9ae8f5e5c0ee99a087e2d10254febc94ba45
+
+    - name: k8s-device-plugin
+      source: nvcr.io/nvidia/k8s-device-plugin
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/k8s-device-plugin
+      versions:
+        - tag: "v0.20.1"
+          digest: sha256:27c1b2553a690ca3d29889dcd61df97525d46f58272c0be8dc63c2b18f120075
+
+    - name: container-toolkit
+      source: nvcr.io/nvidia/k8s/container-toolkit
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/k8s/container-toolkit
+      versions:
+        - tag: "v1.20.1"
+          digest: sha256:00a422252dd875b112f5974321c2feebbdf11c338f8ad131e5ce18e5b3a3bfac
+
+    - name: cuda-sample
+      source: nvcr.io/nvidia/k8s/cuda-sample
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/k8s/cuda-sample
+      versions:
+        - tag: "vectoradd-cuda12.5.0-ubuntu22.04"
+          digest: sha256:7c7540bdf1f942d4fb6db97069fd6c289471b54ac29e3c7fcdf914cf77af7d41
+
+    - name: dcgm-exporter
+      source: nvcr.io/nvidia/k8s/dcgm-exporter
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/k8s/dcgm-exporter
+      versions:
+        - tag: "4.6.1-4.8.4-distroless"
+          digest: sha256:148b0c025e5f2850256816fa33754fbf4733b7a086697a95613fc0ba3db5b003
+
+    - name: kubevirt-gpu-device-plugin
+      source: nvcr.io/nvidia/kubevirt-gpu-device-plugin
+      target: harbor.isuanova.com/mirrors/nvcr.io/nvidia/kubevirt-gpu-device-plugin
+      versions:
+        - tag: "v1.6.0"
+          digest: sha256:367c597799aa6925f5bd2bc4bcdc45c26f018d13cdc2ce9aaf1ca07c492c6d9e

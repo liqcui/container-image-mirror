@@ -1,0 +1,95 @@
+apiVersion: mirror.suanova.io/v1alpha1
+kind: ImageMirrorList
+metadata:
+  name: storage
+  description: Ceph, CSI sidecars and volume provisioners.
+
+spec:
+  defaults:
+    platforms:
+      - linux/amd64
+
+  images:
+    - name: rook-ceph
+      source: docker.io/rook/ceph
+      target: harbor.isuanova.com/mirrors/docker.io/rook/ceph
+      versions:
+        - tag: "v1.20.2"
+          digest: sha256:a642e07d4d0b4d02214e435337c7f5d3f5154369270ea5180de9d5d5d9d965c2
+
+    - name: ceph
+      source: quay.io/ceph/ceph
+      target: harbor.isuanova.com/mirrors/quay.io/ceph/ceph
+      versions:
+        - tag: "v20.2.2"
+          digest: sha256:6b4b5ae33acd3d736eb26d2a19238bce71a22f9cfb99cca887ba6312d0957644
+
+    - name: ceph-csi-operator
+      source: quay.io/cephcsi/ceph-csi-operator
+      target: harbor.isuanova.com/mirrors/quay.io/cephcsi/ceph-csi-operator
+      versions:
+        - tag: "v1.0.4"
+          digest: sha256:c62933fd4083635f969f8a61932af45dba9902d48867e2b5d98a69d8e4344eb6
+
+    - name: ceph-csi
+      source: quay.io/cephcsi/cephcsi
+      target: harbor.isuanova.com/mirrors/quay.io/cephcsi/cephcsi
+      versions:
+        - tag: "v3.17.0"
+          digest: sha256:886e6d2416d62dd7c8fbe659b6306b6c9451d6918e35ad5d1ac774520e11ef87
+
+    - name: csi-addons-sidecar
+      source: quay.io/csiaddons/k8s-sidecar
+      target: harbor.isuanova.com/mirrors/quay.io/csiaddons/k8s-sidecar
+      versions:
+        - tag: "v0.14.0"
+          digest: sha256:69092d026323307933fba2bed9c57d864f2a92cfd385d644b478442ded0d2886
+
+    - name: csi-attacher
+      source: registry.k8s.io/sig-storage/csi-attacher
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/sig-storage/csi-attacher
+      versions:
+        - tag: "v4.12.0"
+          digest: sha256:b9dc9a714a484ccdeeb6f86d88d4db9b7a5ecfc5a55da6db3a60bb3fa33c278a
+
+    - name: csi-node-driver-registrar
+      source: registry.k8s.io/sig-storage/csi-node-driver-registrar
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/sig-storage/csi-node-driver-registrar
+      versions:
+        - tag: "v2.17.0"
+          digest: sha256:f9de845b170155199f2a2a3f9531cf13d78e31235e9db6b6582a8b0db0a50dad
+
+    - name: csi-provisioner
+      source: registry.k8s.io/sig-storage/csi-provisioner
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/sig-storage/csi-provisioner
+      versions:
+        - tag: "v6.2.0"
+          digest: sha256:6be9f63ca4caa6c46aae55aa372500949d8a21473d72f819da1f746076b32d4e
+
+    - name: csi-resizer
+      source: registry.k8s.io/sig-storage/csi-resizer
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/sig-storage/csi-resizer
+      versions:
+        - tag: "v2.1.0"
+          digest: sha256:589e525cddef6d768e68da1f0bc9ffd0a24bf3add3dd010648eb7189976fde79
+
+    - name: csi-snapshotter
+      source: registry.k8s.io/sig-storage/csi-snapshotter
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/sig-storage/csi-snapshotter
+      versions:
+        - tag: "v8.5.0"
+          digest: sha256:da081c27e8a6d91f36042c1942362d0515ced8d06e18c11b8f893e58c4d6d797
+
+    - name: local-volume-provisioner
+      source: registry.k8s.io/sig-storage/local-volume-provisioner
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/sig-storage/local-volume-provisioner
+      versions:
+        - tag: "v2.5.0"
+          digest: sha256:a112f1625aad84e4f425141199ab6ddbb49432c66e05dbbaab033d0ab2e8dfaf
+
+    - name: snapshot-controller
+      source: registry.k8s.io/sig-storage/snapshot-controller
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/sig-storage/snapshot-controller
+      versions:
+        - tag: "v8.0.1"
+          digest: sha256:32b8e4254751c9935c796e6e5c07fe804250bd5032ab78f7133a00f75d504596

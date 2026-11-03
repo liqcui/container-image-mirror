@@ -6,8 +6,7 @@
 
 - 不是 `latest`，也不是任何会随上游发布而移动的别名 tag（`stable`、`main`、`v3`）。
 - 是某个正式发布版本，例如 `1.31.8`、`v3.15.1`。
-- 上游确实发布了该版本对应的多架构 manifest（若只发布单架构，需要在
-  `platforms` 里只声明上游实际提供的架构）。
+- 上游确实发布了该版本对应的 `linux/amd64` manifest。
 
 查看上游现有 tag（以 quay.io 为例）：
 
@@ -39,11 +38,12 @@ Registry 返回的 `Docker-Content-Digest` 一致。
 
 | 文件 | 内容 |
 | --- | --- |
-| `kubernetes.yaml` | Kubernetes 运行时组件、基础镜像 |
-| `observability.yaml` | 指标、日志、面板 |
-| `databases.yaml` | 数据库与缓存 |
-| `networking.yaml` | 网关、代理、Web 服务器 |
-| `ai-inference.yaml` | 模型推理运行时 |
+| `kubernetes.yaml` | Kubernetes 控制面、节点组件与集群插件 |
+| `networking.yaml` | CNI、负载均衡、网关与数据面 |
+| `storage.yaml` | Ceph、CSI sidecar 与卷供给 |
+| `databases.yaml` | PostgreSQL / Redis 的 Operator、服务端与 exporter |
+| `observability.yaml` | 指标、告警、面板与配置 reloader |
+| `gpu.yaml` | NVIDIA GPU Operator 栈、驱动与设备插件 |
 
 确有必要新增领域时，新建 `images/<domain>.yaml`，`metadata.name` 必须与文件名
 一致。新增文件不需要改任何 workflow：矩阵是按目录内容动态展开的。
@@ -64,12 +64,17 @@ Registry 返回的 `Docker-Content-Digest` 一致。
 - `source` / `target` **不带** tag 或 digest，版本写在 `versions[]`。
 - `target` 的第三段必须是源 Registry 主机名。
 - 同一镜像需要保留多个版本时，直接列多个 `versions[]` 条目。
-- 上游只有单架构时，用 `platforms` 覆盖默认值，否则平台断言会失败：
+- 默认只断言 `linux/amd64`（`config/policies.yaml` 的
+  `manifest.defaultPlatforms`）。断言是“必须存在”而不是“只复制”：
+  `skopeo copy --all` 仍复制整个 manifest list，digest 与上游一致。
+- 需要额外断言其他架构时，在镜像下覆盖 `platforms`：
 
   ```yaml
-      platforms:
-        - linux/amd64
+      platforms: [linux/amd64, linux/arm64]
   ```
+
+- 只有上游根本没有 amd64 manifest 时才会去掉 `linux/amd64`，这种情况请在 PR
+  里说明原因——集群只有 amd64 节点。
 
 ## 5. 本地验证
 
