@@ -1,0 +1,163 @@
+name: Sync images
+
+on:
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'Manifest category under images/, or "all"'
+        type: string
+        default: all
+      image:
+        description: 'Only this image name (optional)'
+        type: string
+        default: ''
+      tag:
+        description: 'Only this tag (optional)'
+        type: string
+        default: ''
+      dry_run:
+        description: 'Plan only, do not push to the destination'
+        type: boolean
+        default: false
+      scan:
+        description: 'Run Trivy on each mirrored digest'
+        type: boolean
+        default: true
+  push:
+    branches: [main]
+    paths:
+      - images/**
+      - config/**
+
+# The job only reads the repository; it never writes back to GitHub.
+permissions:
+  contents: read
+
+# Never run two syncs at once: two writers racing on the same tag would make
+# digest verification fail in confusing ways.
+concurrency:
+  group: sync-images
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      categories: ${{ steps.detect.outputs.categories }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect categories
+        id: detect
+        env:
+          INPUT_CATEGORY: ${{ inputs.category }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${INPUT_CATEGORY:-}" && "${INPUT_CATEGORY}" != "all" ]]; then
+            cats=$(printf '%s' "$INPUT_CATEGORY" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          else
+            cats=$(find images -maxdepth 1 -type f -name '*.yaml' \
+              | sed 's|^images/||; s|\.yaml$||' | sort \
+              | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          fi
+          if [[ "$cats" == "[]" ]]; then
+            echo "::error::no manifest files found under images/"
+            exit 1
+          fi
+          echo "categories=$cats" >>"$GITHUB_OUTPUT"
+
+  sync:
+    needs: plan
+    runs-on: ubuntu-latest
+    # Optional: attach protection rules (required reviewers) to this
+    # environment so that pushes to Harbor are gated.
+    environment: production
+    strategy:
+      fail-fast: false
+      # One job per manifest file keeps logs readable and limits the blast
+      # radius of a bad image to its own category.
+      max-parallel: 3
+      matrix:
+        category: ${{ fromJSON(needs.plan.outputs.categories) }}
+    env:
+      MIRROR_USERNAME: ${{ vars.CI_BOT_NAME }}
+      MIRROR_PASSWORD: ${{ secrets.CI_BOT_PASSWORD }}
+      INPUT_IMAGE: ${{ inputs.image }}
+      INPUT_TAG: ${{ inputs.tag }}
+      INPUT_DRY_RUN: ${{ inputs.dry_run }}
+      INPUT_SCAN: ${{ inputs.scan }}
+      SYNC_RESULTS_FILE: ${{ github.workspace }}/.results/results-${{ matrix.category }}.jsonl
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          set -euo pipefail
+          sudo curl -fsSLo /usr/local/bin/yq \
+            "https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"
+          sudo chmod +x /usr/local/bin/yq
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq skopeo
+
+      - name: Install Trivy
+        if: github.event_name == 'push' || inputs.scan == true
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/aquasecurity/trivy/v0.76.1/contrib/install.sh \
+            | sudo sh -s -- -b /usr/local/bin v0.76.1
+          trivy --version
+
+      - name: Install cosign
+        # Signatures are verified before the copy, independently of scanning.
+        if: inputs.dry_run != true
+        uses: sigstore/cosign-installer@v3
+
+      - name: Require credentials
+        if: inputs.dry_run != true
+        run: |
+          if [[ -z "${MIRROR_USERNAME:-}" || -z "${MIRROR_PASSWORD:-}" ]]; then
+            echo "::error::vars.CI_BOT_NAME and secrets.CI_BOT_PASSWORD must be configured (see docs/security.md)"
+            exit 1
+          fi
+
+      - name: Sync ${{ matrix.category }}
+        env:
+          CATEGORY: ${{ matrix.category }}
+        run: |
+          set -euo pipefail
+          args=(--category "$CATEGORY")
+          if [[ -n "${INPUT_IMAGE:-}" ]]; then args+=(--image "$INPUT_IMAGE"); fi
+          if [[ -n "${INPUT_TAG:-}" ]]; then args+=(--tag "$INPUT_TAG"); fi
+
+          if [[ "${INPUT_DRY_RUN:-}" == "true" ]]; then
+            args+=(--dry-run)
+          elif [[ "$GITHUB_EVENT_NAME" == "push" || "${INPUT_SCAN:-}" == "true" ]]; then
+            args+=(--scan)
+          fi
+
+          ./scripts/sync.sh "${args[@]}"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-results-${{ matrix.category }}
+          path: .results
+          if-no-files-found: warn
+          retention-days: 30
+
+  report:
+    needs: [plan, sync]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sync-results-*
+          path: .results
+          merge-multiple: true
+
+      - name: Generate report
+        run: ./scripts/generate-report.sh

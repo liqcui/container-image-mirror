@@ -1,0 +1,97 @@
+apiVersion: mirror.suanova.io/v1alpha1
+kind: ImageMirrorList
+metadata:
+  name: observability
+  description: Metrics, alerting, dashboards and configuration reloaders.
+
+spec:
+  defaults:
+    platforms:
+      - linux/amd64
+
+  images:
+    - name: grafana
+      source: docker.io/grafana/grafana
+      target: harbor.isuanova.com/mirrors/docker.io/grafana/grafana
+      versions:
+        - tag: "13.2.2-distroless"
+          digest: sha256:69a5d2d957ca0bba434c160dcd4f2d07de9d6c756a0ba10ae7f52b72ced1e4cc
+
+    - name: kiwigrid-k8s-sidecar
+      source: docker.io/kiwigrid/k8s-sidecar
+      target: harbor.isuanova.com/mirrors/docker.io/kiwigrid/k8s-sidecar
+      versions:
+        - tag: "2.11.2"
+          digest: sha256:2912be006f62f9ea080194cf6d3afcd90daead8d101d0ba686a137a849f6a4f6
+
+    - name: perses
+      source: docker.io/persesdev/perses
+      target: harbor.isuanova.com/mirrors/docker.io/persesdev/perses
+      versions:
+        - tag: "v0.54.0"
+          digest: sha256:a0e34ddaf9d7599d96036611af205b948c1179646844202d869f3bcf3d5d9e9c
+
+    - name: perses-operator
+      source: docker.io/persesdev/perses-operator
+      target: harbor.isuanova.com/mirrors/docker.io/persesdev/perses-operator
+      versions:
+        - tag: "v0.5.0"
+          digest: sha256:8f8d7b09caefc35777dc88b9e8823efb7232b1ce2869648575176e760d7b55bf
+
+    - name: windows-exporter
+      source: ghcr.io/prometheus-community/windows-exporter
+      target: harbor.isuanova.com/mirrors/ghcr.io/prometheus-community/windows-exporter
+      # Upstream only publishes a Windows image; there is no linux variant.
+      platforms: [windows/amd64]
+      versions:
+        - tag: "0.31.8"
+          digest: sha256:a44090bb42cd2d61fcb7ba50e6d08eb9be59528e5ef840962f4b8ab573de4134
+
+    - name: kiwigrid-k8s-sidecar-quay
+      source: quay.io/kiwigrid/k8s-sidecar
+      target: harbor.isuanova.com/mirrors/quay.io/kiwigrid/k8s-sidecar
+      versions:
+        - tag: "2.11.2"
+          digest: sha256:2912be006f62f9ea080194cf6d3afcd90daead8d101d0ba686a137a849f6a4f6
+
+    - name: prometheus-config-reloader
+      source: quay.io/prometheus-operator/prometheus-config-reloader
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus-operator/prometheus-config-reloader
+      versions:
+        - tag: "v0.94.0"
+          digest: sha256:142a1f11df8dd165f00375b0b1826aecb9c9adeb05c39855893138d7c7575ff7
+
+    - name: prometheus-operator
+      source: quay.io/prometheus-operator/prometheus-operator
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus-operator/prometheus-operator
+      versions:
+        - tag: "v0.94.0"
+          digest: sha256:cf153f64d6c38113fceb2cda7642365ea887f71edd7888f054e43e54cf177e55
+
+    - name: alertmanager
+      source: quay.io/prometheus/alertmanager
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus/alertmanager
+      versions:
+        - tag: "v0.34.0"
+          digest: sha256:690c7b525f4367aa91f73e2f91c632206d32e97c6384bdbf2fb7a861b420340d
+
+    - name: node-exporter
+      source: quay.io/prometheus/node-exporter
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus/node-exporter
+      versions:
+        - tag: "v1.12.1-distroless"
+          digest: sha256:8c9bac11973b94b59be88d6e11fee4429aa743c8846cdc75d65b18db33f6a106
+
+    - name: prometheus
+      source: quay.io/prometheus/prometheus
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus/prometheus
+      versions:
+        - tag: "v3.14.0-distroless"
+          digest: sha256:50c707e96da5ade383cb1707790576480485e93de06aa60ad8802cb5f744bd0a
+
+    - name: thanos
+      source: quay.io/thanos/thanos
+      target: harbor.isuanova.com/mirrors/quay.io/thanos/thanos
+      versions:
+        - tag: "v0.42.4"
+          digest: sha256:b567818fe608067eb0f1d7c2c4fe361e7ad83c8a256234c97685f1d0bf670cc8

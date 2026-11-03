@@ -1,0 +1,34 @@
+apiVersion: mirror.suanova.io/v1alpha1
+kind: RegistryList
+metadata:
+  name: default
+
+spec:
+  # Credentials are never stored in this repository. They arrive at runtime as
+  # MIRROR_USERNAME / MIRROR_PASSWORD (in GitHub Actions: vars.CI_BOT_NAME and
+  # secrets.CI_BOT_PASSWORD). Every destination declared with
+  # `auth: credentials` gets that same robot account in the temporary authfile
+  # the scripts build; hosts declared `auth: anonymous` are pulled without
+  # credentials.
+  destinations:
+    - host: harbor.isuanova.com
+      project: mirrors
+      auth: credentials
+      tlsVerify: true
+
+  sources:
+    - host: docker.io
+      auth: anonymous
+      tlsVerify: true
+    - host: quay.io
+      auth: anonymous
+      tlsVerify: true
+    - host: ghcr.io
+      auth: anonymous
+      tlsVerify: true
+    - host: registry.k8s.io
+      auth: anonymous
+      tlsVerify: true
+    - host: nvcr.io
+      auth: anonymous
+      tlsVerify: true
