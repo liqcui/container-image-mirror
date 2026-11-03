@@ -1,0 +1,55 @@
+apiVersion: mirror.suanova.io/v1alpha1
+kind: ImageMirrorList
+metadata:
+  name: observability
+  description: Metrics, logging and dashboard stack.
+
+spec:
+  defaults:
+    platforms:
+      - linux/amd64
+      - linux/arm64
+
+  images:
+    - name: prometheus
+      source: quay.io/prometheus/prometheus
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus/prometheus
+      # Two pinned releases at once: an old one that is still deployed and the
+      # one being rolled out. Each version is an independent, immutable copy.
+      versions:
+        - tag: v3.15.0
+        # Adding `digest:` turns the pin into a hard assertion: if upstream ever
+        # re-points this tag at different bytes the sync fails instead of
+        # overwriting the mirrored image.
+        #   digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+        - tag: v3.15.1
+
+    - name: alertmanager
+      source: quay.io/prometheus/alertmanager
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus/alertmanager
+      versions:
+        - tag: v0.34.2
+
+    - name: node-exporter
+      source: quay.io/prometheus/node-exporter
+      target: harbor.isuanova.com/mirrors/quay.io/prometheus/node-exporter
+      versions:
+        - tag: v1.12.1
+
+    - name: grafana
+      source: docker.io/grafana/grafana
+      target: harbor.isuanova.com/mirrors/docker.io/grafana/grafana
+      versions:
+        - tag: "13.3.0"
+
+    - name: loki
+      source: docker.io/grafana/loki
+      target: harbor.isuanova.com/mirrors/docker.io/grafana/loki
+      versions:
+        - tag: "3.7.9"
+
+    - name: trivy-operator
+      source: ghcr.io/aquasecurity/trivy-operator
+      target: harbor.isuanova.com/mirrors/ghcr.io/aquasecurity/trivy-operator
+      versions:
+        - tag: "0.10.2"

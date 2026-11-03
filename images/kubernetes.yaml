@@ -1,0 +1,48 @@
+apiVersion: mirror.suanova.io/v1alpha1
+kind: ImageMirrorList
+metadata:
+  name: kubernetes
+  description: Core Kubernetes runtime components and small base images.
+
+spec:
+  defaults:
+    platforms:
+      - linux/amd64
+      - linux/arm64
+
+  images:
+    - name: pause
+      source: registry.k8s.io/pause
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/pause
+      versions:
+        - tag: "3.10"
+
+    - name: etcd
+      source: registry.k8s.io/etcd
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/etcd
+      versions:
+        - tag: 3.7.3-0
+
+    - name: coredns
+      source: registry.k8s.io/coredns/coredns
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/coredns/coredns
+      versions:
+        - tag: v1.15.0
+
+    - name: metrics-server
+      source: registry.k8s.io/metrics-server/metrics-server
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/metrics-server/metrics-server
+      versions:
+        - tag: v0.9.1
+
+    - name: kube-state-metrics
+      source: registry.k8s.io/kube-state-metrics/kube-state-metrics
+      target: harbor.isuanova.com/mirrors/registry.k8s.io/kube-state-metrics/kube-state-metrics
+      versions:
+        - tag: v2.20.0
+
+    - name: busybox
+      source: docker.io/library/busybox
+      target: harbor.isuanova.com/mirrors/docker.io/library/busybox
+      versions:
+        - tag: "1.38.0"

@@ -1,0 +1,56 @@
+name: Validate
+
+# Runs on pull requests and on main. Deliberately needs no registry
+# credentials and no network access beyond installing tooling, so it is safe to
+# execute for fork PRs.
+
+on:
+  pull_request:
+    paths:
+      - images/**
+      - config/**
+      - scripts/**
+      - Makefile
+      - .github/workflows/**
+  push:
+    branches: [main]
+    paths:
+      - images/**
+      - config/**
+      - scripts/**
+      - .github/workflows/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          set -euo pipefail
+          sudo curl -fsSLo /usr/local/bin/yq \
+            "https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+
+      - name: Lint YAML
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet --disable-pip-version-check yamllint
+          yamllint -c .yamllint.yaml images config .github/workflows
+
+      - name: Lint shell scripts
+        run: shellcheck scripts/*.sh
+
+      - name: Validate manifests
+        run: ./scripts/validate.sh

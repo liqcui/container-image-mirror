@@ -1,0 +1,55 @@
+apiVersion: mirror.suanova.io/v1alpha1
+kind: MirrorPolicy
+metadata:
+  name: default
+
+spec:
+  copy:
+    # Passed to `skopeo copy --retry-times`.
+    retryTimes: 5
+    # Exponential backoff between shell-level retries, capped at 60s.
+    retryDelaySeconds: 10
+
+  verify:
+    # Compare the manifest digest of source and target after every copy.
+    # A mismatch fails the job; it is never downgraded to a warning.
+    digest: true
+    # When the target tag already exists with a *different* digest:
+    #   false → fail with `drift`. Nothing is overwritten unless the manifest
+    #           pins the digest it expects, which makes the overwrite a repair
+    #           of a declared state rather than a silent follow of upstream.
+    #   true  → overwrite unconditionally (discouraged: an upstream tag move
+    #           would silently change what production pulls).
+    allowDigestReplace: false
+
+  manifest:
+    # Applied to images that do not override `platforms`.
+    # NOTE: these are assertions, not filters. `skopeo copy --all` mirrors the
+    # whole manifest list, so a declared platform that is missing upstream is a
+    # hard failure rather than something the copy silently drops.
+    defaultPlatforms:
+      - linux/amd64
+      - linux/arm64
+    # Floating tags are rejected because a mirrored image must be reproducible.
+    allowLatest: false
+    # Require <registry>/<project>/<source-host>/<path> so the provenance of a
+    # mirrored image is visible from its pull reference alone.
+    requireSourceHostInTarget: true
+
+  signature:
+    # Opt-in per image via `signature.verify: true` in images/*.yaml.
+    # Most upstream projects do not sign yet, so this is off by default.
+    enabled: false
+    # warn | fail — only used when an image opts in but has no signature.
+    onMissing: warn
+
+  scan:
+    enabled: true
+    scanners: [vuln]
+    severities: [HIGH, CRITICAL]
+    ignoreUnfixed: true
+    # Report findings without breaking the sync by default. Flip to true once
+    # the mirrored set has a clean baseline.
+    failOnFindings: false
+    sbom: true
+    sbomFormat: cyclonedx

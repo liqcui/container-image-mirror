@@ -1,0 +1,12 @@
+extends: default
+
+rules:
+  line-length: disable
+  document-start: disable
+  comments:
+    min-spaces-from-content: 1
+  braces:
+    max-spaces-inside: 1
+  truthy:
+    # `on:` is a workflow key, not a boolean.
+    allowed-values: ['true', 'false', 'on']

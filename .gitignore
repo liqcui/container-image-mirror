@@ -1,0 +1,8 @@
+# Local scratch space produced by the sync and scan scripts.
+.results/
+sbom/
+dist/
+
+# Editor / OS noise
+.DS_Store
+*.swp
