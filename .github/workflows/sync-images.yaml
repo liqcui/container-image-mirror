@@ -143,6 +143,8 @@ jobs:
         with:
           name: sync-results-${{ matrix.category }}
           path: .results
+          # upload-artifact skips dot-directories by default; .results is hidden.
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
 
