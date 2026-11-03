@@ -16,6 +16,9 @@ spec:
       versions:
         - tag: "2.8.1"
           digest: sha256:dbaa3e69f563fc146f3337eb9de422f74f6765bf0203c891ddfbd74a6f9b56eb
+        # TODO: fill in the digest before merge (see docs/adding-images.md step 2):
+        #   skopeo inspect --raw docker://docker.io/library/registry:3.1.2 | sha256sum | cut -d' ' -f1
+        - tag: "3.1.2"
 
     - name: local-path-provisioner
       source: docker.io/rancher/local-path-provisioner
