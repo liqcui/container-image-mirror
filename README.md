@@ -141,7 +141,7 @@ Actions Summary 里生成带 digest 的表格（`scripts/generate-report.sh`）�
 | --- | --- | --- |
 | `validate.yaml` | PR、main push | YAML lint、shellcheck、静态校验；无凭据、无网络 |
 | `sync-images.yaml` | 手动、`images/**` 合入 main | 按文件矩阵并发同步，可选扫描，产出报告 |
-| `scheduled-sync.yaml` | 每天 03:17 | 重新断言固定版本：补缺失、报漂移；**不会**升级版本 |
+| `scheduled-sync.yaml` | 每周一 03:17 | 重新断言固定版本：补缺失、报漂移；**不会**升级版本 |
 | `security-scan.yaml` | 每周一 04:41、手动 | 对 Harbor 中现有 digest 做漏洞扫描 + SBOM |
 
 `sync` 与 `security-scan` 都挂在内置的 `production` environment 上，可以在

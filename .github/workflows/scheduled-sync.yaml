@@ -7,8 +7,9 @@ name: Scheduled sync
 
 on:
   schedule:
-    # Deliberately off the hour: every scheduled job on GitHub asks for :00.
-    - cron: '17 3 * * *'
+    # Weekly, Monday 03:17 UTC, ahead of the weekly security scan. Deliberately
+    # off the hour: every scheduled job on GitHub asks for :00.
+    - cron: '17 3 * * 1'
   workflow_dispatch:
 
 permissions:
