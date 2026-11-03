@@ -24,7 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      MIRROR_CREDENTIALS_JSON: ${{ secrets.MIRROR_CREDENTIALS_JSON }}
+      MIRROR_USERNAME: ${{ vars.CI_BOT_NAME }}
+      MIRROR_PASSWORD: ${{ secrets.CI_BOT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -39,8 +40,8 @@ jobs:
 
       - name: Check credentials
         run: |
-          if [[ -z "${MIRROR_CREDENTIALS_JSON:-}" ]]; then
-            echo "::error::MIRROR_CREDENTIALS_JSON is not configured (see docs/security.md)"
+          if [[ -z "${MIRROR_USERNAME:-}" || -z "${MIRROR_PASSWORD:-}" ]]; then
+            echo "::error::vars.CI_BOT_NAME and secrets.CI_BOT_PASSWORD must be configured (see docs/security.md)"
             exit 1
           fi
 

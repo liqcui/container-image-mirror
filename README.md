@@ -50,19 +50,17 @@ list；amd64 子 manifest 的字节和 digest 都不变，生产拉取不受影�
 
 ## 快速开始
 
-1. 在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 中创建
-   `MIRROR_CREDENTIALS_JSON`，内容形如：
+1. 在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 中配置 Harbor
+   的 CI 机器人：
 
-   ```json
-   {
-     "harbor.isuanova.com": {
-       "username": "robot$mirrors+pusher",
-       "password": "…"
-     }
-   }
-   ```
+   | 类型 | 名称 | 内容 |
+   | --- | --- | --- |
+   | Variable | `CI_BOT_NAME` | Robot Account 用户名，例如 `robot$mirrors+ci` |
+   | Secret | `CI_BOT_PASSWORD` | 对应密码 |
 
-   只有声明了 `auth: credentials` 的 Registry 才需要出现；公开源不填即可。
+   workflow 把它们注入为 `MIRROR_USERNAME` / `MIRROR_PASSWORD`，脚本据此生成
+   临时 authfile。公开源（docker.io、quay.io、ghcr.io、registry.k8s.io、
+   nvcr.io）保持匿名，不需要额外配置。
 
 2. 确认 Harbor 上存在 `mirrors` 项目，且 Robot Account 拥有该项目的
    `push` + `pull` 权限（见 [docs/security.md](docs/security.md)）。

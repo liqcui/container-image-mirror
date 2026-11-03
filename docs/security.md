@@ -4,29 +4,32 @@
 
 ### 存哪里
 
-所有 Registry 凭据放在**一个** GitHub Actions secret 里：
+只有一个凭据对，放在 GitHub 仓库的 Settings → Secrets and variables → Actions：
 
-```
-MIRROR_CREDENTIALS_JSON
-```
+| 类型 | 名称 | 内容 |
+| --- | --- | --- |
+| Variable | `CI_BOT_NAME` | Harbor Robot Account 用户名，例如 `robot$mirrors+ci` |
+| Secret | `CI_BOT_PASSWORD` | 对应密码 |
 
-```json
-{
-  "harbor.isuanova.com": {
-    "username": "robot$mirrors+pusher",
-    "password": "…"
-  },
-  "quay.io": {
-    "username": "…",
-    "password": "…"
-  }
-}
+workflow 把它们注入为环境变量：
+
+```yaml
+env:
+  MIRROR_USERNAME: ${{ vars.CI_BOT_NAME }}
+  MIRROR_PASSWORD: ${{ secrets.CI_BOT_PASSWORD }}
 ```
 
-- 只出现在 workflow 的 `env:` 中，由脚本在 `$RUNNER_TEMP` 里生成临时
-  authfile（权限 `600`），进程退出时删除。
-- 仓库里不出现任何凭据，`config/registries.yaml` 只声明"这个主机需要认证"。
-- 新增源 Registry 只需要改 secret 内容，不需要改 workflow。
+- 脚本在 `$RUNNER_TEMP` 里生成临时 authfile（权限 `600`），进程退出时删除。
+  `config/registries.yaml` 中声明 `auth: credentials` 的 destination（目前只有
+  `harbor.isuanova.com`）会拿到这条凭据，声明 `auth: anonymous` 的源保持匿名。
+- 仓库里不出现任何凭据，`config/registries.yaml` 只声明“这个主机需要认证”。
+- 用户名放 Variable 而不是 Secret，是为了在 workflow 日志里能看出是哪个机器人
+  在写 Harbor；密码仍然只以 Secret 形式存在。
+- 本地运行 `make sync` 时用 `MIRROR_USERNAME=... MIRROR_PASSWORD=... make sync`
+  临时注入，不要写进 shell 配置文件。只读命令（`make check-sources`、
+  `make dry-run`）不需要凭据。
+- 公开源（Docker Hub、Quay、GHCR、registry.k8s.io、nvcr.io）保持匿名，不需要
+  任何额外配置。
 
 ### 用 Robot Account
 
@@ -37,8 +40,7 @@ Harbor 侧使用专职 Robot Account，不要用个人账号：
 | `mirrors` | push + pull | 同步写入 |
 
 最小化的做法是给 Robot Account 只授予 `mirrors` 项目的 push/pull，不要给
-系统管理员或 `library` 之类的额外权限。源 Registry 的凭据按需配置——绝大多数
-公开源（Docker Hub、Quay、GHCR、registry.k8s.io、MCR）匿名即可拉取。
+系统管理员或 `library` 之类的额外权限。
 
 ## PR 与凭据隔离
 
@@ -119,5 +121,5 @@ CycloneDX SBOM，作为 Actions artifact 保留 90 天。
   config 的 `os` / `architecture`，结论一样，只是不再经过 manifest list。
 - Harbor 的 tag 不可变策略与"上游 tag 漂移"冲突时，同步会失败并等待人工处理，
   这是刻意选择：宁可停下来，也不静默覆盖已发布的内容。
-- 凭据以明文 JSON 形式存在于 secret 与临时 authfile 中；runner 是 GitHub 托管的
-  一次性实例，authfile 在作业结束后随实例销毁。
+- 凭据以明文密码形式存在于 GitHub Secret 与临时 authfile 中；runner 是 GitHub
+  托管的一次性实例，authfile 在作业结束后随实例销毁。

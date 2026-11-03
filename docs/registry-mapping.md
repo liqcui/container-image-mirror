@@ -53,9 +53,10 @@
        tlsVerify: true
    ```
 
-2. 如果需要认证，把该主机的 `username` / `password` 加进
-   `MIRROR_CREDENTIALS_JSON` secret（见 [security.md](security.md)）。**不需要**
-   改 workflow。
+2. 如果该主机需要认证，把它的凭据加进 `MIRROR_USERNAME` / `MIRROR_PASSWORD`
+   （GitHub Actions 里是 `vars.CI_BOT_NAME` 和 `secrets.CI_BOT_PASSWORD`，
+   见 [security.md](security.md)）。目前只支持一套凭据用于所有
+   `auth: credentials` 的主机。**不需要**改 workflow。
 
 3. `tlsVerify: false` 仅用于内网自签证书仓库，且应在 PR 里说明原因。
 

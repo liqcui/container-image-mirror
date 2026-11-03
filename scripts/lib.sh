@@ -109,38 +109,47 @@ is_known_source() {
 
 AUTHFILE=""
 
-# Builds one authfile containing every configured host, from the JSON blob in
-# MIRROR_CREDENTIALS_JSON. A single file keeps skopeo invocation simple and
-# avoids needing --src-authfile/--dest-authfile (added in later skopeo builds).
+# Hosts that require credentials, i.e. destinations declared with
+# `auth: credentials` in config/registries.yaml. Sources are anonymous today.
+credentialed_hosts() {
+  yq -r '.spec.destinations[]? | select(.auth == "credentials") | .host' "$REGISTRY_FILE"
+}
+
+# Builds one authfile from MIRROR_USERNAME / MIRROR_PASSWORD, with an entry for
+# every destination that requires credentials. A single file keeps skopeo
+# invocation simple and avoids needing --src-authfile/--dest-authfile (added in
+# later skopeo builds). With no credentials the file is empty, which is enough
+# for read-only commands such as --check-sources against public registries.
 prepare_authfile() {
-  local raw=${MIRROR_CREDENTIALS_JSON:-} dir
+  local dir host entries=''
+  local user=${MIRROR_USERNAME:-} pass=${MIRROR_PASSWORD:-}
   dir=${RUNNER_TEMP:-${TMPDIR:-/tmp}}
   AUTHFILE="${dir}/mirror-auth-$$.json"
 
-  if [[ -z $raw ]]; then
+  if [[ -n $user || -n $pass ]]; then
+    [[ -n $user && -n $pass ]] ||
+      die "MIRROR_USERNAME and MIRROR_PASSWORD must be set together"
+  fi
+
+  while IFS= read -r host; do
+    if [[ -z $host ]]; then
+      continue
+    fi
+    if [[ -z $user ]]; then
+      warn "no credentials for ${host}; set MIRROR_USERNAME/MIRROR_PASSWORD to push"
+      continue
+    fi
+    entries+="${host}"$'\t'"$(printf '%s:%s' "$user" "$pass" | base64 | tr -d '\n')"$'\n'
+  done <<<"$(credentialed_hosts)"
+
+  if [[ -z $entries ]]; then
     printf '{"auths":{}}\n' >"$AUTHFILE"
   else
-    printf '%s' "$raw" | jq -e . >/dev/null 2>&1 ||
-      die "MIRROR_CREDENTIALS_JSON is not valid JSON"
-    printf '%s' "$raw" | jq -c '
-      (if has("auths") then .auths else . end) as $m
-      | {
-          auths: ($m | to_entries | map(
-            . as $e
-            | {
-                key: $e.key,
-                value: (
-                  if $e.value.auth then { auth: $e.value.auth }
-                  elif ($e.value.username and $e.value.password) then
-                    { auth: (($e.value.username + ":" + $e.value.password) | @base64) }
-                  else
-                    error("credentials for \($e.key) need auth or username+password")
-                  end
-                )
-              }
-          ) | from_entries)
-        }
-    ' >"$AUTHFILE" || die "failed to build authfile from MIRROR_CREDENTIALS_JSON"
+    printf '%s' "$entries" | jq -R -s '
+      split("\n")
+      | map(select(length > 0) | split("\t"))
+      | {auths: (map({key: .[0], value: {auth: .[1]}}) | from_entries)}
+    ' >"$AUTHFILE" || die "failed to build authfile from MIRROR_USERNAME/MIRROR_PASSWORD"
   fi
   chmod 600 "$AUTHFILE"
 }

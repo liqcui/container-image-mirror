@@ -21,7 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      MIRROR_CREDENTIALS_JSON: ${{ secrets.MIRROR_CREDENTIALS_JSON }}
+      MIRROR_USERNAME: ${{ vars.CI_BOT_NAME }}
+      MIRROR_PASSWORD: ${{ secrets.CI_BOT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
